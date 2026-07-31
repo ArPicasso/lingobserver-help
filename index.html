@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Правила и база знаний — анонимная практика английского</title>
+<meta name="description" content="Правила сервиса и полная база знаний анонимного чата для практики английского: XP, JS-монеты, стрики, лиги, мини-игры и дуэли.">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  /* ─────────────────────────────────────────────────────────────────────────
+     Same design system as the Mini App, 2026-07-30: white / black / orange,
+     after Saturn. The tokens below are copied verbatim from the app so the two
+     can't drift — if a value changes there, change it here too. The rules that
+     matter and are easy to break by accident:
+       · cards get NO border and NO shadow — the --canvas/--surface step is what
+         separates them, which is why --canvas is never white;
+       · text on an ORANGE fill is INK (#0d0d0f), never white (6.6:1 vs 2.9:1);
+       · orange AS TEXT is --orange-deep, never --orange;
+       · the price tag marks a number that is MONEY and nothing else;
+       · no gradients, no uppercase, one type face.
+     ───────────────────────────────────────────────────────────────────────── */
+  :root {
+    --canvas: #f2f2f7;
+    --surface: #fff;
+    --ink: #1c1c1e;
+    --steel: #6a6a70;
+    --orange: #f4700c;
+    --orange-deep: #ad4b00;   /* orange AS TEXT, and the pressed fill */
+    --on-orange: #0d0d0f;
+    --tint: rgba(244, 112, 12, .1);
+    --line: rgba(60, 60, 67, .17);
+    --line-2: rgba(60, 60, 67, .09);
+    --ok: #2e7d4f;
+    --bad: #d2402f;
+    --ok-text: #276b44;
+    --bad-text: #b8352a;
+    --r: 14px;
+    --r-sm: 10px;
+    --r-xs: 8px;
+    --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  }
+  /* Dark follows the system preference, and the toggle in the header can override
+     it in either direction — so [data-theme] has to win over the media query. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --canvas: #000;
+      --surface: #1c1c1e;
+      --ink: #f5f5f7;
+      --steel: #98989f;
+      --orange-deep: #ff8326;
+      --ok-text: #57bd86;
+      --bad-text: #f08877;
+      --tint: rgba(244, 112, 12, .14);
+      --line: rgba(84, 84, 88, .6);
+      --line-2: rgba(84, 84, 88, .34);
+    }
+  }
+  :root[data-theme="dark"] {
+    --canvas: #000;
+    --surface: #1c1c1e;
+    --ink: #f5f5f7;
+    --steel: #98989f;
+    --orange-deep: #ff8326;
+    --ok-text: #57bd86;
+    --bad-text: #f08877;
+    --tint: rgba(244, 112, 12, .14);
+    --line: rgba(84, 84, 88, .6);
+    --line-2: rgba(84, 84, 88, .34);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--canvas); scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background: var(--canvas);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  a { color: var(--orange-deep); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; border-radius: 4px; }
+
+  /* ── header ──────────────────────────────────────────────────────────────
+     The mark is the channel avatar: a black planet with an orange ring. */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--canvas) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--line-2);
+  }
+  @supports not (backdrop-filter: blur(1px)) { .topbar { background: var(--canvas); } }
+  .topbar-in {
+    max-width: 1040px; margin: 0 auto; padding: 10px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .mark {
+    width: 30px; height: 30px; border-radius: 50%; flex: none;
+    background: var(--ink); border: 3px solid var(--orange);
+  }
+  .brand { font-weight: 600; font-size: 15px; letter-spacing: -.01em; }
+  .brand span { color: var(--steel); font-weight: 500; }
+  .topbar nav { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+  .topbar nav a {
+    color: var(--ink); font-size: 14px; font-weight: 500;
+    padding: 7px 12px; border-radius: var(--r-sm);
+  }
+  .topbar nav a:hover { background: var(--surface); text-decoration: none; }
+  .theme-btn {
+    background: var(--surface); color: var(--ink); border: 0;
+    width: 34px; height: 34px; border-radius: var(--r-sm);
+    font: inherit; font-size: 15px; cursor: pointer; flex: none;
+    display: grid; place-items: center;
+    transition: transform .1s ease;
+  }
+  .theme-btn:active { transform: translateY(1px); }
+  /* Narrow phones: the header is the only row that can't wrap, so it sheds the
+     subtitle and tightens the links rather than pushing the page sideways. */
+  @media (max-width: 430px) {
+    .topbar-in { padding: 8px 14px; gap: 9px; }
+    /* The mark alone carries identity here; the two links are worth more than
+       the wordmark on a phone, and neither of them may wrap. */
+    .brand { display: none; }
+    .topbar nav { gap: 0; }
+    .topbar nav a { padding: 6px 8px; font-size: 13px; white-space: nowrap; }
+    .theme-btn { width: 30px; height: 30px; }
+  }
+
+  /* ── layout ───────────────────────────────────────────────────────────── */
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px 72px; }
+  .layout { display: block; }
+  @media (min-width: 940px) {
+    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; align-items: start; }
+  }
+
+  /* ── hero ─────────────────────────────────────────────────────────────── */
+  .hero { padding: 56px 0 40px; max-width: 720px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--tint); color: var(--orange-deep);
+    font-size: 13px; font-weight: 600;
+    padding: 6px 12px; border-radius: var(--r-xs); margin-bottom: 20px;
+  }
+  .eyebrow::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--orange); }
+  h1 { font-size: 40px; line-height: 1.1; font-weight: 700; letter-spacing: -.03em; }
+  @media (max-width: 600px) { h1 { font-size: 30px; } .hero { padding: 36px 0 28px; } }
+  .lede { font-size: 19px; color: var(--steel); margin-top: 16px; line-height: 1.5; }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 18px; border-radius: var(--r-sm);
+    font-size: 15px; font-weight: 600; border: 0;
+    background: var(--surface); color: var(--ink);
+    transition: transform .1s ease, background-color .15s ease;
+  }
+  .btn:hover { text-decoration: none; }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: var(--orange); color: var(--on-orange); }
+
+  /* ── sidebar table of contents ────────────────────────────────────────── */
+  .toc { display: none; }
+  @media (min-width: 940px) {
+    .toc { display: block; position: sticky; top: 74px; padding-bottom: 40px; }
+    .toc-title {
+      font-size: 11.5px; font-weight: 600; color: var(--steel);
+      letter-spacing: .04em; text-transform: uppercase; margin: 18px 0 8px;
+    }
+    .toc a {
+      display: block; color: var(--steel); font-size: 14px; font-weight: 500;
+      padding: 5px 10px; border-radius: var(--r-xs); line-height: 1.35;
+    }
+    .toc a:hover { background: var(--surface); color: var(--ink); text-decoration: none; }
+    .toc a.on { color: var(--ink); background: var(--surface); font-weight: 600; }
+  }
+
+  /* ── sections ─────────────────────────────────────────────────────────── */
+  .part { padding-top: 24px; }
+  .part-head { margin: 24px 0 24px; }
+  .part-head h2 {
+    font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15;
+  }
+  .part-head p { color: var(--steel); margin-top: 10px; max-width: 62ch; }
+  h3 {
+    font-size: 21px; font-weight: 700; letter-spacing: -.015em;
+    margin: 36px 0 14px; scroll-margin-top: 76px;
+  }
+  h4 { font-size: 16px; font-weight: 600; margin: 22px 0 8px; }
+  p + p, ul + p, p + ul, .card + p { margin-top: 12px; }
+  .card p + ul, .card ul + p { margin-top: 10px; }
+
+  /* A card is a white pane on the grey page — no border, no shadow. */
+  .card { background: var(--surface); border-radius: var(--r); padding: 20px; margin: 16px 0; }
+  @media (max-width: 600px) { .card { padding: 16px; } }
+  .card > :first-child { margin-top: 0; }
+
+  ul, ol { padding-left: 1.15em; }
+  li { margin: 7px 0; }
+  li::marker { color: var(--steel); }
+  strong { font-weight: 600; }
+  .muted { color: var(--steel); }
+  .small { font-size: 14px; }
+
+  /* ── the signature: a price tag ───────────────────────────────────────────
+     An orange badge with a punched hole. Marks a number that is MONEY — a
+     price, a balance, an entry cost, a stake — and nothing else. XP is not
+     money and never wears one. */
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--orange); color: var(--on-orange);
+    font-size: 13px; font-weight: 600; white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    padding: 4px 10px; border-radius: var(--r-xs);
+  }
+  .tag::before {
+    content: ""; flex: none; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--on-orange); opacity: .55;
+  }
+
+  /* Quiet inline chip for an XP amount — deliberately NOT the price tag. */
+  .xp {
+    display: inline-block; background: var(--canvas); color: var(--ink);
+    font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
+    padding: 3px 8px; border-radius: var(--r-xs); white-space: nowrap;
+  }
+
+  /* ── numbered rules ───────────────────────────────────────────────────── */
+  .rule { display: flex; gap: 16px; }
+  .rule-n {
+    flex: none; width: 34px; height: 34px; border-radius: var(--r-xs);
+    background: var(--tint); color: var(--orange-deep);
+    display: grid; place-items: center;
+    font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  .rule-b { min-width: 0; }
+  .rule-b h3 { margin: 4px 0 10px; font-size: 19px; }
+
+  /* ── row lists (replace tables — the ladder, the price list, commands) ─── */
+  .rows { margin-top: 4px; }
+  .row {
+    display: flex; align-items: baseline; gap: 14px;
+    padding: 11px 0; border-top: 1px solid var(--line-2);
+  }
+  .row:first-child { border-top: 0; }
+  .row-k { flex: none; width: 116px; font-weight: 600; font-size: 15px; }
+  .row-v { min-width: 0; flex: 1; }
+  .row.price { align-items: center; }
+  .row.price .row-v { text-align: right; flex: none; margin-left: auto; }
+  .row.price .row-k { width: auto; flex: 1; font-weight: 500; }
+  @media (max-width: 520px) {
+    .row:not(.price) { display: block; }
+    .row-k { width: auto; }
+  }
+  .cmd { color: var(--orange-deep); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .final { color: var(--bad-text); font-weight: 600; }
+
+  /* ── two/three-up grids ───────────────────────────────────────────────── */
+  .grid { display: grid; gap: 14px; margin: 16px 0; }
+  @media (min-width: 640px) { .grid.two { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 760px) { .grid.three { grid-template-columns: repeat(3, 1fr); } }
+  .grid .card { margin: 0; }
+
+  /* ── callout: the one line that must not be missed ────────────────────── */
+  .note {
+    background: var(--tint); border-radius: var(--r); padding: 16px 18px;
+    margin: 16px 0; font-size: 15px;
+  }
+  .note strong { color: var(--orange-deep); }
+
+  /* ── faq ──────────────────────────────────────────────────────────────── */
+  details { border-top: 1px solid var(--line-2); padding: 4px 0; }
+  details:first-of-type { border-top: 0; }
+  summary {
+    cursor: pointer; list-style: none; padding: 13px 30px 13px 0;
+    font-weight: 600; font-size: 15px; position: relative;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: "+"; position: absolute; right: 4px; top: 11px;
+    color: var(--steel); font-size: 19px; font-weight: 400; line-height: 1;
+  }
+  details[open] summary::after { content: "–"; }
+  details > :not(summary) { padding-bottom: 14px; color: var(--ink); }
+
+  footer {
+    max-width: 1040px; margin: 0 auto; padding: 32px 20px 56px;
+    color: var(--steel); font-size: 14px; border-top: 1px solid var(--line-2);
+  }
+  footer a { font-weight: 500; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="mark" aria-hidden="true"></div>
+    <div class="brand">Практика английского <span>· справка</span></div>
+    <nav>
+      <a href="#rules">Правила</a>
+      <a href="#kb">База знаний</a>
+      <button class="theme-btn" id="theme" type="button" aria-label="Переключить тему">◐</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">Анонимный чат для практики</div>
+    <h1>Правила сервиса и база знаний</h1>
+    <p class="lede">
+      Здесь всё, что бот делает с твоими сообщениями, за что даёт XP и монеты
+      и по каким правилам живёт. Шесть правил на первой половине страницы,
+      подробности — на второй.
+    </p>
+    <div class="hero-cta">
+      <a class="btn primary" href="#rules">Правила сервиса</a>
+      <a class="btn" href="#kb">База знаний</a>
+    </div>
+  </section>
+
+  <div class="layout">
+
+    <aside class="toc">
+      <div class="toc-title">Правила</div>
+      <a href="#rule-en">1. Пиши по-английски</a>
+      <a href="#rule-respect">2. Уважай собеседника</a>
+      <a href="#rule-anon">3. Анонимность обоюдная</a>
+      <a href="#rule-text">4. Только текст</a>
+      <a href="#rule-fair">5. Играй честно</a>
+      <a href="#rule-bans">6. Лестница блокировок</a>
+      <a href="#tools">Инструменты и хранение</a>
+      <div class="toc-title">База знаний</div>
+      <a href="#start">С чего начать</a>
+      <a href="#chat">Разговор</a>
+      <a href="#mistakes">Ошибки: кто что видит</a>
+      <a href="#identity">Анонимность и друзья</a>
+      <a href="#privacy">Приватность и удаление</a>
+      <a href="#xp">XP и уровни</a>
+      <a href="#coins">JS-монеты</a>
+      <a href="#streak">Стрик и квесты</a>
+      <a href="#badges">Ачивки</a>
+      <a href="#leagues">Лиги и ивенты</a>
+      <a href="#games">Мини-игры</a>
+      <a href="#duels">Дуэли</a>
+      <a href="#invite">Позови друга</a>
+      <a href="#commands">Команды</a>
+      <a href="#faq">Частые вопросы</a>
+    </aside>
+
+    <main>
+
+      <!-- ══════════════════ ЧАСТЬ 1 — ПРАВИЛА ══════════════════ -->
+      <section class="part" id="rules">
+        <div class="part-head">
+          <h2>Правила сервиса</h2>
+          <p>
+            Их шесть, и они короткие, потому что смысл у них один: сделать так,
+            чтобы сюда было не страшно прийти учиться.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="rule">
+            <div class="rule-n">1</div>
+            <div class="rule-b">
+              <h3 id="rule-en">Пиши по-английски</h3>
+              <p>
+                Это тренажёр английского, а не просто чат. Русский (или любой другой
+                язык) в диалоге бот замечает сам — без чтения смысла, по буквам.
+              </p>
+              <ul>
+                <li>Одно-два слова на другом языке (имя, название) — ничего не будет.</li>
+                <li><strong>Три сообщения не на английском подряд</strong> — релей встаёт на паузу
+                  <strong>на 5 минут</strong>. Любое английское сообщение обнуляет счётчик.</li>
+                <li>Первый раз — просто пауза. Начиная со второго раза за всё время аккаунта —
+                  попадаешь в лестницу блокировок (правило&nbsp;6).</li>
+              </ul>
+              <p class="small muted">
+                Собеседник видит нейтральное уведомление: «собеседник написал не на английском».
+                Само сообщение доходит — пауза режет только следующие.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="rule">
+            <div class="rule-n">2</div>
+            <div class="rule-b">
+              <h3 id="rule-respect">Уважай собеседника</h3>
+              <p>
+                По ту сторону такой же ученик, который стесняется своего английского.
+                Оскорбления, травля, приставания, NSFW и попытки выдавить личные
+                контакты запрещены.
+              </p>
+              <p>
+                Диалоги читает автоматический модератор. Он ищет ровно четыре вещи:
+                оскорбления, NSFW, груминг и слив контактов. Помеченное оскорбление —
+                это нарушение по правилу&nbsp;6.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="rule">
+            <div class="rule-n">3</div>
+            <div class="rule-b">
+              <h3 id="rule-anon">Анонимность — обоюдная</h3>
+              <p>
+                Настоящий профиль скрыт по умолчанию. Единственный способ его открыть —
+                кнопка <strong>🔓 Раскрыться</strong>, и она срабатывает
+                <strong>только если нажали оба</strong>. Один тап никого не раскрывает.
+              </p>
+              <ul>
+                <li>Не выпрашивай настоящий аккаунт, телефон или другие мессенджеры — это правило&nbsp;2.</li>
+                <li>Игнорировать приглашение раскрыться — нормально. Отказ не нужно объяснять.</li>
+                <li>Если чат закончился раньше ответа, приглашение просто аннулируется.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="rule">
+            <div class="rule-n">4</div>
+            <div class="rule-b">
+              <h3 id="rule-text">Только текст</h3>
+              <p>
+                Бот пересылает собеседнику <strong>только текст</strong>. Фото, стикеры,
+                голосовые, кружки и файлы до него не дойдут — это не сбой, а осознанное
+                ограничение: медиа-канал невозможно модерировать так же надёжно, как текст.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="rule">
+            <div class="rule-n">5</div>
+            <div class="rule-b">
+              <h3 id="rule-fair">Играй честно</h3>
+              <p>
+                Экономика бота (XP, JS-монеты, лиги) рассчитана на живое общение,
+                а не на накрутку.
+              </p>
+              <ul>
+                <li><strong>Дневной потолок — 150 XP</strong> и, соответственно, 150 JS.
+                  Флуд короткими сообщениями не окупается.</li>
+                <li>Взаимные «победы» в дуэлях, фарм рефералов, второй аккаунт ради
+                  бонусов — накрутка. Такие балансы обнуляются, аккаунты блокируются.</li>
+                <li>Бонус за приглашение платится только после <strong>реального первого
+                  разговора</strong> приглашённого — от 5 сообщений.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="rule">
+            <div class="rule-n">6</div>
+            <div class="rule-b">
+              <h3 id="rule-bans">Лестница блокировок</h3>
+              <p>
+                Один счётчик на аккаунт, <strong>на всю жизнь аккаунта</strong> — он не
+                обнуляется со временем. В него попадают два вида нарушений: помеченное
+                модератором оскорбление и повторный уход с английского (правило&nbsp;1).
+              </p>
+              <div class="rows">
+                <div class="row"><div class="row-k">1-е</div>
+                  <div class="row-v">Только предупреждение, чат продолжается</div></div>
+                <div class="row"><div class="row-k">2-е</div>
+                  <div class="row-v">Чат обрывается, поиск заблокирован на <strong>1 час</strong></div></div>
+                <div class="row"><div class="row-k">3-е</div>
+                  <div class="row-v">Чат обрывается, поиск заблокирован на <strong>24 часа</strong></div></div>
+                <div class="row"><div class="row-k">4-е</div>
+                  <div class="row-v">Чат обрывается, поиск заблокирован на <strong>7 дней</strong></div></div>
+                <div class="row"><div class="row-k">5-е и далее</div>
+                  <div class="row-v"><span class="final">Блокировка навсегда</span></div></div>
+              </div>
+              <p class="small muted">Пока блокировка активна, бот показывает, сколько осталось.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 id="tools">Твои инструменты в любой момент</h3>
+        <div class="card">
+          <div class="rows">
+            <div class="row"><div class="row-k">🚩 Жалоба</div>
+              <div class="row-v">Завершает чат и отправляет диалог на разбор</div></div>
+            <div class="row"><div class="row-k">🚫 Блок</div>
+              <div class="row-v">Гарантирует, что вы больше никогда не встретитесь в поиске</div></div>
+            <div class="row"><div class="row-k">⏭ / 🛑</div>
+              <div class="row-v">Выйти из разговора без объяснений. Всегда</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/wipe</span></div>
+              <div class="row-v">Стереть историю разборов или удалить аккаунт целиком, мгновенно</div></div>
+          </div>
+        </div>
+        <p>
+          Жаловаться не стыдно и ничем не грозит: репорт не показывается собеседнику
+          как «на тебя пожаловались».
+        </p>
+
+        <h3>Что мы храним</h3>
+        <p>
+          Переписка <strong>не сохраняется</strong>. Сырые сообщения живут во временной
+          памяти около суток — этого хватает на анализ ошибок и на кнопки внутри
+          сессии — и удаляются автоматически. В базе остаётся не диалог, а разбор
+          ошибки: фрагмент, исправление, правило.
+        </p>
+        <div class="note">
+          <strong>Твои разговоры не сохраняются. Остаётся только твой прогресс.</strong>
+        </div>
+      </section>
+
+      <!-- ══════════════════ ЧАСТЬ 2 — БАЗА ЗНАНИЙ ══════════════════ -->
+      <section class="part" id="kb">
+        <div class="part-head">
+          <h2>База знаний</h2>
+          <p>
+            Анонимный чат для практики английского. Мы соединяем тебя с таким же
+            учеником: вы переписываетесь по-английски на живые темы, а бот стоит
+            посередине и незаметно разбирает ошибки. Главное отличие от обычной
+            рулетки — тебя здесь учат по ходу разговора.
+          </p>
+        </div>
+
+        <div class="note">
+          Ошибаться тут выгодно: за разобранную ошибку начисляется больше XP,
+          чем за сообщение.
+        </div>
+
+        <h3 id="start">С чего начать</h3>
+        <div class="card">
+          <div class="rows">
+            <div class="row"><div class="row-k">1. Профиль</div>
+              <div class="row-v">⚙️ Настройки → уровень английского, язык и хотя бы один
+                интерес. Без этих трёх полей поиск не запустится — по ним подбирается
+                собеседник.</div></div>
+            <div class="row"><div class="row-k">2. Поиск</div>
+              <div class="row-v">«🔎 Найти собеседника». Когда пара найдётся, придёт баннер:
+                уровень и язык собеседника плюс ваши общие интересы. Личность он не
+                раскрывает.</div></div>
+            <div class="row"><div class="row-k">3. Первое слово</div>
+              <div class="row-v">Поздоровайся по-английски. Дальше просто общайтесь.</div></div>
+            <div class="row"><div class="row-k">4. Разбор</div>
+              <div class="row-v">«📝 Мои ошибки» — там копятся все разборы, навсегда и только
+                для тебя.</div></div>
+          </div>
+        </div>
+        <h4>Почему поиск не запускается</h4>
+        <p>
+          Не хватает одного из трёх обязательных полей — бот прямо напишет, какого именно.
+          Если очередь пустая, фильтры <strong>ослабляются сами</strong>: сначала ищем
+          идеальное совпадение, потом расширяем круг, чтобы ты не сидел в очереди вечно.
+        </p>
+
+        <h3 id="chat">Разговор</h3>
+        <div class="card">
+          <div class="rows">
+            <div class="row"><div class="row-k">⏭ Следующий</div>
+              <div class="row-v">Закончить и сразу искать нового собеседника</div></div>
+            <div class="row"><div class="row-k">🛑 Стоп</div>
+              <div class="row-v">Закончить и выйти из поиска</div></div>
+            <div class="row"><div class="row-k">🎲 Тема</div>
+              <div class="row-v">Бот подкинет вопрос по вашим общим интересам. Уходит обоим,
+                кулдаун минута</div></div>
+            <div class="row"><div class="row-k">🆘 Как сказать…?</div>
+              <div class="row-v">Спроси у бота, как выразить мысль по-английски. Приватно</div></div>
+          </div>
+        </div>
+        <p>
+          При мэтче каждому приходит подборка из 2–3 живых фраз под его уровень.
+          Применил фразу в разговоре — <span class="xp">+5 XP</span>, засчитывается один
+          раз за фразу.
+        </p>
+        <p>
+          После разговора приходит <strong>итог сессии</strong>: сколько сообщений, какие
+          ошибки разобраны, какие фразы применены, сколько XP начислено.
+        </p>
+        <p class="small muted">
+          Кнопка «💡 Подскажи фразу» временно отключена — мы не довели её качество до
+          нужного уровня. Пока работают «🎲 Тема» и «🆘 Как сказать…?».
+        </p>
+
+        <h3 id="mistakes">Ошибки: кто что видит</h3>
+        <p>Это самая частая путаница, поэтому по пунктам.</p>
+        <div class="card">
+          <div class="rows">
+            <div class="row"><div class="row-k">Свои</div>
+              <div class="row-v"><strong>Видишь всегда.</strong> Разбор приходит сразу после
+                сообщения: фрагмент, исправление, правило. Отключить показ собственных
+                ошибок нельзя — за этим ты и пришёл.</div></div>
+            <div class="row"><div class="row-k">В сессии</div>
+              <div class="row-v">Внутри одного разговора твой разбор по умолчанию видит и
+                собеседник — обезличенно и мягко, это часть учёбы для вас обоих.
+                Отключается тумблером в настройках.</div></div>
+            <div class="row"><div class="row-k">История</div>
+              <div class="row-v"><span class="cmd">/mistakes</span> — всё, что накопилось за
+                всё время. <strong>Приватно навсегда</strong>, собеседник туда не заглядывает
+                никогда.</div></div>
+            <div class="row"><div class="row-k">Модерация</div>
+              <div class="row-v">Флаги модератора видит только автор. Собеседнику о них не
+                сообщают.</div></div>
+          </div>
+        </div>
+        <p>
+          Разбор появляется только когда бот <strong>уверен</strong>, что это настоящая
+          ошибка. Спорные и стилистические мелочи он молчаливо пропускает — лучше
+          пропустить ошибку, чем «исправить» правильное.
+        </p>
+
+        <h3 id="identity">Анонимность, раскрытие и друзья</h3>
+        <p>
+          У тебя есть псевдо-личность: эмодзи + ник (например, 🐧 LuckyPenguin81),
+          уровень, язык и ачивки. Настоящий аккаунт скрыт.
+        </p>
+        <p>
+          <strong>🔓 Раскрыться</strong> работает только по обоюдному согласию: пока оба
+          не нажали, никто ничего не видит. Рядом есть кнопка «❓ Что значит раскрыться» —
+          она объясняет механику до нажатия.
+        </p>
+        <p>
+          <strong>Друзья.</strong> Понравился собеседник — добавь в друзья (нужно согласие
+          обоих). Список — <span class="cmd">/friends</span>, оттуда можно списаться
+          повторно, минуя очередь. Приглашение живёт несколько часов и имеет кулдаун,
+          чтобы им не спамили.
+        </p>
+        <p>
+          <strong>Смена ника</strong> — <span class="cmd">/rename</span>,
+          <span class="tag">50 JS</span>. Можно взять свой вариант, если он свободен.
+        </p>
+
+        <h3 id="privacy">Приватность и удаление</h3>
+        <div class="card">
+          <ul>
+            <li>Сырые сообщения хранятся во временной памяти около <strong>24 часов</strong>
+              и удаляются автоматически.</li>
+            <li>В базу попадает <strong>не переписка, а разбор</strong>: фрагмент,
+              исправление, правило — привязанные к псевдониму.</li>
+            <li>Пригласившему тебя другу <strong>не показывается твой ник</strong> — связку
+              «реальный человек ↔ псевдоним» мы не выдаём.</li>
+          </ul>
+        </div>
+        <p><span class="cmd">/wipe</span> даёт два варианта:</p>
+        <div class="grid two">
+          <div class="card">
+            <h4>🧹 Стереть историю ошибок</h4>
+            <p class="small muted">Сносит все разборы. Аккаунт, прогресс и монеты остаются.</p>
+          </div>
+          <div class="card">
+            <h4>🗑 Удалить меня полностью</h4>
+            <p class="small muted">Завершает текущий чат, убирает из очереди, удаляет профиль,
+              псевдоним, прогресс и все временные данные. Начнёшь с нуля.</p>
+          </div>
+        </div>
+
+        <h3 id="xp">XP и уровни</h3>
+        <div class="card">
+          <div class="rows">
+            <div class="row"><div class="row-k"><span class="xp">+1 XP</span></div>
+              <div class="row-v">За каждое сообщение собеседнику</div></div>
+            <div class="row"><div class="row-k"><span class="xp">+5 XP</span></div>
+              <div class="row-v">За каждую разобранную ошибку</div></div>
+            <div class="row"><div class="row-k"><span class="xp">+5 XP</span></div>
+              <div class="row-v">За применённую фразу из подсказки</div></div>
+            <div class="row"><div class="row-k"><span class="xp">до +10 XP</span></div>
+              <div class="row-v">За завершённый разговор: +1 за каждые 5 сообщений</div></div>
+            <div class="row"><div class="row-k"><span class="xp">+15 XP</span></div>
+              <div class="row-v">За каждую новую ачивку</div></div>
+            <div class="row"><div class="row-k">Ещё</div>
+              <div class="row-v">Квесты дня и мини-игры</div></div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>Дневной потолок — 150 XP.</strong> Это защита экономики от накрутки;
+          при обычном общении ты его не заметишь.
+        </div>
+        <p>
+          <strong>Уровни</strong> растут по нарастающей: до 2-го нужно 100 XP, до 3-го — 300,
+          до 4-го — 600, до 5-го — 1000. Первые берутся быстро, дальше интереснее.
+          Заработанный XP <strong>никогда не уменьшается</strong> — покупки его не тратят.
+        </p>
+
+        <h3 id="coins">JS-монеты 🪙</h3>
+        <p>
+          JS — это тратимая валюта. <strong>1 заработанный XP = 1 JS.</strong> Начисляются
+          одновременно, из одного и того же действия: XP двигает уровень и лигу,
+          JS лежат в кошельке.
+        </p>
+        <div class="card">
+          <div class="rows">
+            <div class="row price"><div class="row-k">Новый ник — <span class="cmd">/rename</span></div>
+              <div class="row-v"><span class="tag">50 JS</span></div></div>
+            <div class="row price"><div class="row-k">Заморозка стрика — <span class="cmd">/freeze</span></div>
+              <div class="row-v"><span class="tag">25 JS</span></div></div>
+            <div class="row price"><div class="row-k">Дуэль сверх трёх бесплатных в день</div>
+              <div class="row-v"><span class="tag">10 JS</span></div></div>
+            <div class="row price"><div class="row-k">Wordle — игра сверх бесплатной</div>
+              <div class="row-v"><span class="tag">5 JS</span></div></div>
+            <div class="row price"><div class="row-k">«Найди ошибку» — дополнительный сет</div>
+              <div class="row-v"><span class="tag">5 JS</span></div></div>
+            <div class="row price"><div class="row-k">«Связи» — повторная игра</div>
+              <div class="row-v"><span class="tag">3 JS</span></div></div>
+          </div>
+        </div>
+        <p class="small muted">
+          Каждое движение баланса пишется в неизменяемый журнал — если что-то списалось
+          не так, это восстановимо. Если покупка сорвалась после списания, монеты
+          возвращаются автоматически. Баланс — в Mini App
+          (<span class="cmd">/me</span>).
+        </p>
+
+        <h3 id="streak">Стрик 🔥 и квесты дня 🎯</h3>
+        <p>
+          Каждый день хотя бы с одним разговором продлевает стрик. Пропустил день —
+          сгорает. <strong>Заморозка 🧊</strong> (<span class="cmd">/freeze</span>,
+          <span class="tag">25 JS</span>) закрывает ровно один пропущенный день,
+          автоматически. Держать можно максимум 2 штуки — богатый игрок всё равно обязан
+          появляться.
+        </p>
+        <p class="small muted">
+          Вечером бот присылает напоминание, если стрик сгорит сегодня в полночь по UTC.
+          Один раз в день, только тем, кому есть что терять.
+        </p>
+        <p>Три квеста, обновляются каждые сутки. Награда забирается в Mini App:</p>
+        <div class="grid three">
+          <div class="card">
+            <h4>💬 Разговор</h4>
+            <p class="small muted">Заверши разговор на 10+ сообщений</p>
+            <p><span class="xp">+10 XP</span></p>
+          </div>
+          <div class="card">
+            <h4>✉️ Сообщения</h4>
+            <p class="small muted">Отправь 15 сообщений</p>
+            <p><span class="xp">+5 XP</span></p>
+          </div>
+          <div class="card">
+            <h4>💡 Фраза</h4>
+            <p class="small muted">Используй фразу из подсказки</p>
+            <p><span class="xp">+5 XP</span></p>
+          </div>
+        </div>
+
+        <h3 id="badges">Ачивки 🏅</h3>
+        <p>
+          Одиннадцать штук, каждая даёт <span class="xp">+15 XP</span>. Все, включая ещё
+          не открытые, — в <span class="cmd">/badges</span>.
+        </p>
+        <div class="card">
+          <div class="rows">
+            <div class="row"><div class="row-k">🔥 Разогрелся</div><div class="row-v">3 дня подряд</div></div>
+            <div class="row"><div class="row-k">⚡ Неделя в потоке</div><div class="row-v">7 дней подряд</div></div>
+            <div class="row"><div class="row-k">🏆 Месяц без пропусков</div><div class="row-v">30 дней подряд</div></div>
+            <div class="row"><div class="row-k">🚀 Сто дней</div><div class="row-v">100 дней подряд</div></div>
+            <div class="row"><div class="row-k">🌱 Первые шаги</div><div class="row-v">100 XP</div></div>
+            <div class="row"><div class="row-k">🌿 Уверенный собеседник</div><div class="row-v">500 XP</div></div>
+            <div class="row"><div class="row-k">🌳 Ветеран чата</div><div class="row-v">1500 XP</div></div>
+            <div class="row"><div class="row-k">💎 Мастер общения</div><div class="row-v">5000 XP</div></div>
+            <div class="row"><div class="row-k">🏃 Марафонец</div><div class="row-v">Один разговор на 30+ сообщений</div></div>
+            <div class="row"><div class="row-k">✨ Коллекционер фраз</div><div class="row-v">10 применённых фраз из подсказок</div></div>
+            <div class="row"><div class="row-k">🤝 Первый друг</div><div class="row-v">Первый добавленный собеседник</div></div>
+          </div>
+        </div>
+
+        <h3 id="leagues">Лиги 🏆 и ивенты 🎉</h3>
+        <p>Пять лиг: <strong>Бронза → Серебро → Золото → Платина → Бриллиант</strong>.</p>
+        <div class="card">
+          <ul>
+            <li>Каждую неделю ты играешь в группе примерно из 30 человек своей лиги.</li>
+            <li>Место в группе — по XP, набранному <strong>за эту неделю</strong>. Недельный
+              счёт обнуляется на старте цикла, общий XP профиля не трогается.</li>
+            <li>В конце недели <strong>топ-10</strong> поднимаются ⬆️, <strong>последние
+              5</strong> опускаются ⬇️.</li>
+            <li>В маленьких группах (меньше 15 человек) никто не двигается — так честнее.</li>
+          </ul>
+        </div>
+        <p>
+          <span class="cmd">/league</span> показывает твою таблицу с размеченными зонами
+          повышения и вылета и расстоянием до них в XP. <span class="cmd">/leaderboard</span> —
+          доски за скользящие 7 дней: стрики, прогресс, длинные диалоги. Срез можно
+          переключить на свой уровень. В конце недели приходит личный дайджест с итогом;
+          неактивную неделю бот молча пропускает.
+        </p>
+        <p>
+          Иногда включается <strong>тема-ивент</strong>: при мэтче обоим прилетает
+          ice-breaker по теме, а за общение капает отдельный Event XP — он не сбрасывается
+          и не мешает обычному прогрессу. Смотри <span class="cmd">/event</span>.
+          У ивента бывает <strong>множитель XP</strong> (happy hour) — он объявляется
+          в баннере мэтча.
+        </p>
+
+        <h3 id="games">Мини-игры</h3>
+        <p class="muted">
+          Живут в Mini App — открывается по <span class="cmd">/me</span> или кнопке в меню.
+        </p>
+        <div class="grid three">
+          <div class="card">
+            <h4>Wordle — «Слова»</h4>
+            <p class="small">Отгадай слово из 5 букв за 6 попыток. Это поток игр, а не общее
+              слово дня: закончил — начинай следующую.</p>
+            <div class="rows small">
+              <div class="row price"><div class="row-k">Бесплатно в сутки</div>
+                <div class="row-v"><strong>1</strong></div></div>
+              <div class="row price"><div class="row-k">Дальше вход</div>
+                <div class="row-v"><span class="tag">5 JS</span></div></div>
+              <div class="row price"><div class="row-k">XP за победу</div>
+                <div class="row-v"><strong>12 → 4</strong></div></div>
+            </div>
+            <p class="small muted">Докупленная игра XP не приносит — это чистая практика,
+              экран честно предупреждает. Слово выбирается по уровню сложности и теме:
+              это две независимые оси.</p>
+          </div>
+          <div class="card">
+            <h4>«Связи»</h4>
+            <p class="small">Собери доску 4×4 в четыре группы по смыслу. Допускается
+              4 ошибки.</p>
+            <div class="rows small">
+              <div class="row price"><div class="row-k">За группу</div>
+                <div class="row-v"><span class="xp">+2 XP</span></div></div>
+              <div class="row price"><div class="row-k">Идеальное прохождение</div>
+                <div class="row-v"><span class="xp">+2 XP</span></div></div>
+              <div class="row price"><div class="row-k">Повторная игра</div>
+                <div class="row-v"><span class="tag">3 JS</span></div></div>
+            </div>
+            <p class="small muted">Дневной набор общий и не перегенерируется.</p>
+          </div>
+          <div class="card">
+            <h4>«Найди ошибку»</h4>
+            <p class="small">5 заданий в день: предложение с ошибкой, надо её найти.
+              Сложность растёт внутри сета.</p>
+            <div class="rows small">
+              <div class="row price"><div class="row-k">За верный ответ</div>
+                <div class="row-v"><span class="xp">+2 XP</span></div></div>
+              <div class="row price"><div class="row-k">Дополнительный сет</div>
+                <div class="row-v"><span class="tag">5 JS</span></div></div>
+            </div>
+            <p class="small muted">Платный сет берёт новые задания из пула дня. XP за него
+              идёт в пределах дневного потолка: когда потолок выбран, это тоже становится
+              чистой практикой.</p>
+          </div>
+        </div>
+
+        <h3 id="duels">Дуэли ⚔️</h3>
+        <p>
+          Соревнование один на один по «Словам» или «Связям» — с собеседником в чате
+          или с другом.
+        </p>
+        <div class="card">
+          <div class="rows">
+            <div class="row price"><div class="row-k">Бесплатно в сутки</div>
+              <div class="row-v"><strong>3 дуэли</strong></div></div>
+            <div class="row price"><div class="row-k">Дальше вход</div>
+              <div class="row-v"><span class="tag">10 JS</span></div></div>
+            <div class="row price"><div class="row-k">Время на всю дуэль</div>
+              <div class="row-v"><strong>5 минут</strong></div></div>
+            <div class="row price"><div class="row-k">Победа</div>
+              <div class="row-v"><span class="xp">+5 XP</span></div></div>
+          </div>
+        </div>
+        <ul>
+          <li>Когда время вышло, результат считается <strong>по фактическому счёту</strong> —
+            доигрывать доску, чтобы соперник получил результат, не нужно.</li>
+          <li><strong>Сдаться можно в любой момент</strong>, пока своя доска не закончена.</li>
+          <li><strong>Выход из чата = поражение.</strong> Если у вас идёт живая дуэль, бот
+            переспросит перед выходом и покажет, сколько осталось. Репорт, блок и
+            модерационная блокировка рвут чат без вопросов.</li>
+          <li>Бот уведомит, когда соперник закончил свою доску.</li>
+        </ul>
+
+        <h3 id="invite">Позови друга 🔗</h3>
+        <p>
+          <span class="cmd">/invite</span> даёт персональную ссылку. Когда друг придёт по
+          ней и проведёт <strong>свой первый разговор от 5 сообщений</strong>, вы
+          <strong>оба</strong> получите по <span class="tag">15 JS</span>.
+        </p>
+        <p class="small muted">
+          Бонус выдаётся один раз на человека — навсегда. У приглашающего есть лимит
+          3 начисления в сутки. Простая регистрация без разговора не оплачивается: так
+          ссылку невозможно фармить.
+        </p>
+
+        <h3 id="commands">Команды</h3>
+        <div class="card">
+          <div class="rows">
+            <div class="row"><div class="row-k"><span class="cmd">/find</span></div>
+              <div class="row-v">Искать собеседника (<span class="cmd">/cancel</span> — отменить поиск)</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/next</span> <span class="cmd">/stop</span></div>
+              <div class="row-v">Сменить собеседника / закончить разговор</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/me</span></div>
+              <div class="row-v">Профиль, квесты, игры, магазин (Mini App)</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/mistakes</span></div>
+              <div class="row-v">История разборов — приватно</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/badges</span></div>
+              <div class="row-v">Ачивки, включая закрытые</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/league</span></div>
+              <div class="row-v">Лига и доски (<span class="cmd">/leaderboard</span>)</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/friends</span></div>
+              <div class="row-v">Друзья</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/event</span></div>
+              <div class="row-v">Текущий ивент и Event XP</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/duel</span></div>
+              <div class="row-v">Вызвать на дуэль</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/freeze</span></div>
+              <div class="row-v">Купить заморозку стрика</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/rename</span></div>
+              <div class="row-v">Сменить ник</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/invite</span></div>
+              <div class="row-v">Пригласить друга</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/wipe</span></div>
+              <div class="row-v">Стереть историю или удалить аккаунт</div></div>
+            <div class="row"><div class="row-k"><span class="cmd">/menu</span></div>
+              <div class="row-v">Вернуть клавиатуру, если она пропала</div></div>
+          </div>
+        </div>
+
+        <h3 id="faq">Частые вопросы</h3>
+        <div class="card">
+          <details>
+            <summary>Отправил фото или голосовое — собеседник не получил</summary>
+            <p>Так и задумано: пересылается только текст.</p>
+          </details>
+          <details>
+            <summary>Собеседник молчит</summary>
+            <p>Жми ⏭ Следующий — это нормально и никого не обижает.</p>
+          </details>
+          <details>
+            <summary>Клавиатура пропала или кнопки не отвечают</summary>
+            <p><span class="cmd">/menu</span> вернёт её. Старая панель из прошлого разговора
+              может «протухнуть» — бот скажет об этом, вместо того чтобы молча ничего
+              не делать.</p>
+          </details>
+          <details>
+            <summary>Не могу выбрать другой язык практики</summary>
+            <p>Пока открыт только английский, остальные помечены 🔒.</p>
+          </details>
+          <details>
+            <summary>Ошибку разобрали неверно</summary>
+            <p>Разборы делает языковая модель, и она не безупречна. Ошибки с низкой
+              уверенностью не показываются вовсе, но промахи всё равно случаются —
+              доверяй здравому смыслу.</p>
+          </details>
+          <details>
+            <summary>Хочу начать с чистого листа</summary>
+            <p><span class="cmd">/wipe</span> → «Удалить меня полностью». Обратно ничего
+              не восстановить.</p>
+          </details>
+        </div>
+
+      </section>
+    </main>
+  </div>
+</div>
+
+<footer>
+  Хорошей практики! 🎉 · <a href="#rules">Правила</a> · <a href="#kb">База знаний</a>
+</footer>
+
+<script>
+  // Theme toggle: the page follows the system preference until the reader
+  // overrides it, and the override sticks. No other JS on the page.
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('theme');
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved);
+    btn.addEventListener('click', function () {
+      var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var current = root.getAttribute('data-theme') || (systemDark ? 'dark' : 'light');
+      var next = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+    });
+
+    // Sidebar highlight: mark the section the reader is currently in.
+    var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+    var targets = links.map(function (a) { return document.getElementById(a.hash.slice(1)); })
+                       .filter(Boolean);
+    if (!('IntersectionObserver' in window) || !targets.length) return;
+    var seen = {};
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { seen[e.target.id] = e.isIntersecting; });
+      var active = null;
+      for (var i = 0; i < targets.length; i++) {
+        if (seen[targets[i].id]) { active = targets[i].id; break; }
+      }
+      links.forEach(function (a) { a.classList.toggle('on', a.hash === '#' + active); });
+    }, { rootMargin: '-70px 0px -70% 0px' });
+    targets.forEach(function (t) { io.observe(t); });
+  })();
+</script>
+</body>
+</html>
