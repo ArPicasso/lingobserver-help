@@ -3,19 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Правила и база знаний — анонимная практика английского</title>
-<meta name="description" content="Правила сервиса и полная база знаний анонимного чата для практики английского: XP, JS-монеты, стрики, лиги, мини-игры и дуэли.">
+<title>Saturn — правила сервиса и база знаний</title>
+<meta name="description" content="Saturn — анонимный чат для практики английского. Правила сервиса и полная база знаний: XP, JS-монеты, стрики, лиги, мини-игры и дуэли.">
 <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="avatar.jpg">
+<link rel="apple-touch-icon" href="avatar.jpg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Saturn — правила сервиса и база знаний">
+<meta property="og:description" content="Анонимный чат для практики английского: как всё устроено, за что начисляются XP и JS-монеты, по каким правилам живёт сервис.">
+<meta property="og:image" content="https://arpicasso.github.io/lingobserver-help/avatar.jpg">
+<meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
   /* ─────────────────────────────────────────────────────────────────────────
-     Same design system as the Mini App, 2026-07-30: white / black / orange,
-     after Saturn. The tokens below are copied verbatim from the app so the two
-     can't drift — if a value changes there, change it here too. The rules that
-     matter and are easy to break by accident:
+     Saturn's design system, the same one the Mini App runs on (2026-07-30):
+     white / black / orange, after the mark — a black planet with an orange
+     ring. The tokens below are copied verbatim from the app so the two can't
+     drift; if a value changes there, change it here too. The rules that matter
+     and are easy to break by accident:
        · cards get NO border and NO shadow — the --canvas/--surface step is what
          separates them, which is why --canvas is never white;
        · text on an ORANGE fill is INK (#0d0d0f), never white (6.6:1 vs 2.9:1);
@@ -102,12 +110,24 @@
     max-width: 1040px; margin: 0 auto; padding: 10px 20px;
     display: flex; align-items: center; gap: 12px;
   }
-  .mark {
-    width: 30px; height: 30px; border-radius: 50%; flex: none;
-    background: var(--ink); border: 3px solid var(--orange);
-  }
+  /* The mark is the brand avatar: a black planet with an orange ring. */
+  .mark { width: 30px; height: 30px; border-radius: 50%; flex: none; display: block; }
   .brand { font-weight: 600; font-size: 15px; letter-spacing: -.01em; }
   .brand span { color: var(--steel); font-weight: 500; }
+
+  /* The Saturn UI marks — the same seventeen glyphs the bot draws on its
+     inline buttons (assets/button_icons). They are single-colour orange PNGs,
+     so one file serves both themes. Rendered at the size they were designed
+     for; alt is empty because the label next to them already says it. */
+  .ic {
+    width: 19px; height: 19px; flex: none; display: inline-block;
+    vertical-align: -3px; margin-right: 7px;
+  }
+  /* In a list where only SOME rows carry a mark, the icon is pulled out of the
+     text flow and every key gets the same indent — otherwise the labels without
+     one sit 25px to the left and the column reads as broken. */
+  .rows.iconic .row-k { position: relative; padding-left: 26px; }
+  .rows.iconic .row-k .ic { position: absolute; left: 0; top: 2px; margin: 0; }
   .topbar nav { margin-left: auto; display: flex; align-items: center; gap: 4px; }
   .topbar nav a {
     color: var(--ink); font-size: 14px; font-weight: 500;
@@ -142,7 +162,9 @@
   }
 
   /* ── hero ─────────────────────────────────────────────────────────────── */
-  .hero { padding: 56px 0 40px; max-width: 720px; }
+  .hero { padding: 48px 0 40px; max-width: 720px; }
+  .hero-mark { width: 78px; height: 78px; border-radius: 50%; display: block; margin-bottom: 22px; }
+  @media (max-width: 600px) { .hero-mark { width: 64px; height: 64px; margin-bottom: 18px; } }
   .eyebrow {
     display: inline-flex; align-items: center; gap: 7px;
     background: var(--tint); color: var(--orange-deep);
@@ -290,18 +312,22 @@
   details > :not(summary) { padding-bottom: 14px; color: var(--ink); }
 
   footer {
-    max-width: 1040px; margin: 0 auto; padding: 32px 20px 56px;
+    max-width: 1040px; margin: 0 auto; padding: 30px 20px 60px;
     color: var(--steel); font-size: 14px; border-top: 1px solid var(--line-2);
   }
   footer a { font-weight: 500; }
+  .foot-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .foot-brand img { width: 40px; height: 40px; border-radius: 50%; flex: none; }
+  .foot-brand b { color: var(--ink); font-size: 16px; font-weight: 600; display: block; }
+  .foot-links { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 14px; }
 </style>
 </head>
 <body>
 
 <header class="topbar">
   <div class="topbar-in">
-    <div class="mark" aria-hidden="true"></div>
-    <div class="brand">Практика английского <span>· справка</span></div>
+    <img class="mark" src="avatar.jpg" alt="" width="30" height="30">
+    <div class="brand">Saturn <span>· справка</span></div>
     <nav>
       <a href="#rules">Правила</a>
       <a href="#kb">База знаний</a>
@@ -313,7 +339,8 @@
 <div class="wrap">
 
   <section class="hero">
-    <div class="eyebrow">Анонимный чат для практики</div>
+    <img class="hero-mark" src="avatar.jpg" alt="Saturn" width="78" height="78">
+    <div class="eyebrow">Saturn · анонимный чат для практики английского</div>
     <h1>Правила сервиса и база знаний</h1>
     <p class="lede">
       Здесь всё, что бот делает с твоими сообщениями, за что даёт XP и монеты
@@ -323,6 +350,9 @@
     <div class="hero-cta">
       <a class="btn primary" href="#rules">Правила сервиса</a>
       <a class="btn" href="#kb">База знаний</a>
+      <a class="btn" href="https://t.me/tgsaturnbot">
+        <img class="ic" src="icons/app.png" alt="" width="19" height="19">Открыть чат
+      </a>
     </div>
   </section>
 
@@ -351,6 +381,7 @@
       <a href="#games">Мини-игры</a>
       <a href="#duels">Дуэли</a>
       <a href="#invite">Позови друга</a>
+      <a href="#saturn">Где нас найти</a>
       <a href="#commands">Команды</a>
       <a href="#faq">Частые вопросы</a>
     </aside>
@@ -417,7 +448,7 @@
               <h3 id="rule-anon">Анонимность — обоюдная</h3>
               <p>
                 Настоящий профиль скрыт по умолчанию. Единственный способ его открыть —
-                кнопка <strong>🔓 Раскрыться</strong>, и она срабатывает
+                кнопка <strong><img class="ic" src="icons/reveal.png" alt="" width="19" height="19">Раскрыться</strong>, и она срабатывает
                 <strong>только если нажали оба</strong>. Один тап никого не раскрывает.
               </p>
               <ul>
@@ -493,10 +524,10 @@
 
         <h3 id="tools">Твои инструменты в любой момент</h3>
         <div class="card">
-          <div class="rows">
-            <div class="row"><div class="row-k">🚩 Жалоба</div>
+          <div class="rows iconic">
+            <div class="row"><div class="row-k"><img class="ic" src="icons/report.png" alt="" width="19" height="19">Жалоба</div>
               <div class="row-v">Завершает чат и отправляет диалог на разбор</div></div>
-            <div class="row"><div class="row-k">🚫 Блок</div>
+            <div class="row"><div class="row-k"><img class="ic" src="icons/block.png" alt="" width="19" height="19">Блок</div>
               <div class="row-v">Гарантирует, что вы больше никогда не встретитесь в поиске</div></div>
             <div class="row"><div class="row-k">⏭ / 🛑</div>
               <div class="row-v">Выйти из разговора без объяснений. Всегда</div></div>
@@ -542,17 +573,17 @@
         <div class="card">
           <div class="rows">
             <div class="row"><div class="row-k">1. Профиль</div>
-              <div class="row-v">⚙️ Настройки → уровень английского, язык и хотя бы один
+              <div class="row-v"><img class="ic" src="icons/settings.png" alt="" width="19" height="19">Настройки → уровень английского, язык и хотя бы один
                 интерес. Без этих трёх полей поиск не запустится — по ним подбирается
                 собеседник.</div></div>
             <div class="row"><div class="row-k">2. Поиск</div>
-              <div class="row-v">«🔎 Найти собеседника». Когда пара найдётся, придёт баннер:
+              <div class="row-v"><img class="ic" src="icons/find.png" alt="" width="19" height="19">«Найти собеседника». Когда пара найдётся, придёт баннер:
                 уровень и язык собеседника плюс ваши общие интересы. Личность он не
                 раскрывает.</div></div>
             <div class="row"><div class="row-k">3. Первое слово</div>
               <div class="row-v">Поздоровайся по-английски. Дальше просто общайтесь.</div></div>
             <div class="row"><div class="row-k">4. Разбор</div>
-              <div class="row-v">«📝 Мои ошибки» — там копятся все разборы, навсегда и только
+              <div class="row-v"><img class="ic" src="icons/mistakes.png" alt="" width="19" height="19">«Мои ошибки» — там копятся все разборы, навсегда и только
                 для тебя.</div></div>
           </div>
         </div>
@@ -565,12 +596,12 @@
 
         <h3 id="chat">Разговор</h3>
         <div class="card">
-          <div class="rows">
+          <div class="rows iconic">
             <div class="row"><div class="row-k">⏭ Следующий</div>
               <div class="row-v">Закончить и сразу искать нового собеседника</div></div>
             <div class="row"><div class="row-k">🛑 Стоп</div>
               <div class="row-v">Закончить и выйти из поиска</div></div>
-            <div class="row"><div class="row-k">🎲 Тема</div>
+            <div class="row"><div class="row-k"><img class="ic" src="icons/topic.png" alt="" width="19" height="19">Тема</div>
               <div class="row-v">Бот подкинет вопрос по вашим общим интересам. Уходит обоим,
                 кулдаун минута</div></div>
             <div class="row"><div class="row-k">🆘 Как сказать…?</div>
@@ -624,7 +655,7 @@
           уровень, язык и ачивки. Настоящий аккаунт скрыт.
         </p>
         <p>
-          <strong>🔓 Раскрыться</strong> работает только по обоюдному согласию: пока оба
+          <strong><img class="ic" src="icons/reveal.png" alt="" width="19" height="19">Раскрыться</strong> работает только по обоюдному согласию: пока оба
           не нажали, никто ничего не видит. Рядом есть кнопка «❓ Что значит раскрыться» —
           она объясняет механику до нажатия.
         </p>
@@ -800,7 +831,7 @@
 
         <h3 id="games">Мини-игры</h3>
         <p class="muted">
-          Живут в Mini App — открывается по <span class="cmd">/me</span> или кнопке в меню.
+          <img class="ic" src="icons/hub.png" alt="" width="19" height="19">Живут в Mini App — открывается по <span class="cmd">/me</span> или кнопке в меню.
         </p>
         <div class="grid three">
           <div class="card">
@@ -888,32 +919,44 @@
           ссылку невозможно фармить.
         </p>
 
+        <h3 id="saturn">Где нас найти</h3>
+        <div class="card">
+          <div class="rows iconic">
+            <div class="row"><div class="row-k"><img class="ic" src="icons/app.png" alt="" width="19" height="19">Чат</div>
+              <div class="row-v"><a href="https://t.me/tgsaturnbot">@tgsaturnbot</a> — сам бот:
+                поиск собеседника, разборы ошибок, игры и Mini App</div></div>
+            <div class="row"><div class="row-k"><img class="ic" src="icons/hub.png" alt="" width="19" height="19">Хаб</div>
+              <div class="row-v"><a href="https://t.me/saturn_hub">@saturn_hub</a> — новости,
+                обновления и всё остальное, что делает Saturn</div></div>
+          </div>
+        </div>
+
         <h3 id="commands">Команды</h3>
         <div class="card">
-          <div class="rows">
-            <div class="row"><div class="row-k"><span class="cmd">/find</span></div>
+          <div class="rows iconic">
+            <div class="row"><div class="row-k"><img class="ic" src="icons/find.png" alt="" width="19" height="19"><span class="cmd">/find</span></div>
               <div class="row-v">Искать собеседника (<span class="cmd">/cancel</span> — отменить поиск)</div></div>
             <div class="row"><div class="row-k"><span class="cmd">/next</span> <span class="cmd">/stop</span></div>
               <div class="row-v">Сменить собеседника / закончить разговор</div></div>
-            <div class="row"><div class="row-k"><span class="cmd">/me</span></div>
+            <div class="row"><div class="row-k"><img class="ic" src="icons/app.png" alt="" width="19" height="19"><span class="cmd">/me</span></div>
               <div class="row-v">Профиль, квесты, игры, магазин (Mini App)</div></div>
-            <div class="row"><div class="row-k"><span class="cmd">/mistakes</span></div>
+            <div class="row"><div class="row-k"><img class="ic" src="icons/mistakes.png" alt="" width="19" height="19"><span class="cmd">/mistakes</span></div>
               <div class="row-v">История разборов — приватно</div></div>
             <div class="row"><div class="row-k"><span class="cmd">/badges</span></div>
               <div class="row-v">Ачивки, включая закрытые</div></div>
-            <div class="row"><div class="row-k"><span class="cmd">/league</span></div>
+            <div class="row"><div class="row-k"><img class="ic" src="icons/league.png" alt="" width="19" height="19"><span class="cmd">/league</span></div>
               <div class="row-v">Лига и доски (<span class="cmd">/leaderboard</span>)</div></div>
-            <div class="row"><div class="row-k"><span class="cmd">/friends</span></div>
+            <div class="row"><div class="row-k"><img class="ic" src="icons/friends.png" alt="" width="19" height="19"><span class="cmd">/friends</span></div>
               <div class="row-v">Друзья</div></div>
             <div class="row"><div class="row-k"><span class="cmd">/event</span></div>
               <div class="row-v">Текущий ивент и Event XP</div></div>
-            <div class="row"><div class="row-k"><span class="cmd">/duel</span></div>
+            <div class="row"><div class="row-k"><img class="ic" src="icons/duel.png" alt="" width="19" height="19"><span class="cmd">/duel</span></div>
               <div class="row-v">Вызвать на дуэль</div></div>
             <div class="row"><div class="row-k"><span class="cmd">/freeze</span></div>
               <div class="row-v">Купить заморозку стрика</div></div>
             <div class="row"><div class="row-k"><span class="cmd">/rename</span></div>
               <div class="row-v">Сменить ник</div></div>
-            <div class="row"><div class="row-k"><span class="cmd">/invite</span></div>
+            <div class="row"><div class="row-k"><img class="ic" src="icons/invite.png" alt="" width="19" height="19"><span class="cmd">/invite</span></div>
               <div class="row-v">Пригласить друга</div></div>
             <div class="row"><div class="row-k"><span class="cmd">/wipe</span></div>
               <div class="row-v">Стереть историю или удалить аккаунт</div></div>
@@ -961,7 +1004,23 @@
 </div>
 
 <footer>
-  Хорошей практики! 🎉 · <a href="#rules">Правила</a> · <a href="#kb">База знаний</a>
+  <div class="foot-brand">
+    <img src="avatar.jpg" alt="" width="40" height="40">
+    <div>
+      <b>Saturn</b>
+      <span>Анонимный чат для практики английского</span>
+    </div>
+  </div>
+  <div class="foot-links">
+    <a href="https://t.me/tgsaturnbot"><img class="ic" src="icons/app.png" alt="" width="19" height="19">Чат — @tgsaturnbot</a>
+    <span aria-hidden="true">·</span>
+    <a href="https://t.me/saturn_hub"><img class="ic" src="icons/hub.png" alt="" width="19" height="19">Хаб — @saturn_hub</a>
+    <span aria-hidden="true">·</span>
+    <a href="#rules">Правила</a>
+    <span aria-hidden="true">·</span>
+    <a href="#kb">База знаний</a>
+  </div>
+  Хорошей практики! 🎉
 </footer>
 
 <script>
